@@ -16,6 +16,6 @@ clear
 
 # Install dependencies
 printf "[+] Installing dependencies...\n"
-pip3 install scapy
+pip3 install -r requirements.txt
 printf "\n[✓] done!"
 sleep 1
