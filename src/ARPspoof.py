@@ -12,7 +12,7 @@ def takeArguments():
         Takes the commande line arguments and returns it to the main()
     """
     # Object of ArgumentParser() for handling the CLI Aruguments
-    parser = ArgumentParser(description="Add the description of this tool here")
+    parser = ArgumentParser(description="It continuously sends ARP requests to the victim IP and Router.")
 
     # List of arguments
     parser.add_argument(
