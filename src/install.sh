@@ -3,19 +3,37 @@
 # Update apt
 printf "[+] Updating apt...\n"
 sudo apt update
-printf "\n[✓] apt updated."
+
+if [[$? -eq 0]] then
+	printf "\n[✓] apt updated."
+else 
+	printf "\n[!] apt not updated!"
+fi
+
 sleep 1
 clear
 
 # install or upgrade python3
 printf "[+] Installing python...\n"
 apt install python3 -y
-printf "\n[✓] python installed."
+
+if [[$? -eq 0]] then
+	printf "\n[✓] python3 installed."
+else
+	printf "\n[!] python3 not installed!"
+fi
+
 sleep 1
 clear
 
 # Install dependencies
 printf "[+] Installing dependencies...\n"
 pip3 install -r requirements.txt
-printf "\n[✓] done!"
+
+if [[$? -eq 0]] then
+	printf "\n[✓] done!"
+else
+	printf "\n[!] dependencies not installed!"
+fi
+
 sleep 1
