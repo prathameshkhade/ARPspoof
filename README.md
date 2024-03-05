@@ -15,14 +15,14 @@ git clone https://github.com/prathameshkhade/ARPspoof
 ```
 2. Change your current working directory:
 ```sh
-cd ARP/src/
+cd ARPspoof/src/
 ```
 3. Install scapy library required for creating and sending packets in requirements.txt:
 ```sh
 pip3 install -r requirements.txt
 ``` 
 - Or use the script for installing python and scapy library:
-```sh
+```bash
 chmod 744 install.sh && ./install.sh
 ```
 
